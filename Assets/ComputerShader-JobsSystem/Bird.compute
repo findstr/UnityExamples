@@ -1,0 +1,50 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+#define GROUP_SIZE	128
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+struct Bird {
+	float speed;
+	float3 position;
+	float3 direction;
+};
+
+RWStructuredBuffer<Bird> bird_data;
+
+float deltaTime;
+float speed;
+float3 target;
+float neighbour;
+int bird_count;
+
+
+[numthreads(GROUP_SIZE,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	Bird b = bird_data[id.x];
+	float3 separation = 0;
+	float3 alignment = 0;
+	float3 cohesion = target;
+	uint n = 1;
+	for (uint i = 0; i < bird_count; i++) {
+		Bird x = bird_data[i];
+		float3 dir = b.position - x.position;
+		float dist = max(length(dir), 0.000001);
+		if (dist < neighbour) {
+			separation += dir * (1.0 / dist - 1.0 / neighbour);
+			alignment += x.direction;
+			cohesion += x.position;
+			n += 1;
+		}
+	}
+	float avg = 1.0f / n;
+	alignment *= avg;
+	cohesion *= avg;
+	cohesion = normalize(cohesion - b.position);
+	float3 dir = normalize(alignment + separation + cohesion);
+	b.direction = lerp(dir, b.direction, 0.94);
+	b.position += b.direction * b.speed * deltaTime;
+	bird_data[id.x] = b;
+}
+
