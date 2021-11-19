@@ -14,6 +14,24 @@ public class CircleList : MonoBehaviour
     private float roll = 0f;
     private GameObject[] images;
 
+    struct Scale
+    {
+        public int a;
+        public int b;
+        public Scale(int aa, int bb)
+        {
+            a = aa;
+            b = bb;
+        }
+    };
+
+    private Scale[] region = new Scale[4] {
+        new Scale(1, 2),
+        new Scale(2, 3),
+        new Scale(3, 2),
+        new Scale(2, 1),
+    };
+
     private Vector3 pos_in_circle(float radius, float degree)
     {
         float x = radius * Mathf.Sin(degree);
@@ -26,15 +44,10 @@ public class CircleList : MonoBehaviour
     {
         float degree = 360f / images.Length;
         for (int i = 0; i < images.Length; i++) {
-            float scale = 1f;
             var go = images[i];
             var angle = (degree * i + roll) % 360f;
-            if (angle <= 90) 
-                scale = Mathf.Lerp(1f, 2f, angle / 90f);
-            else if (angle >= 270)
-                scale = Mathf.Lerp(2f, 1f, Mathf.Abs(270f - angle) / 90f);
-            else
-                scale = Mathf.Lerp(3f, 2f, Mathf.Abs(angle - 180f) / 90f);
+            Scale s = region[(int)(angle / 90)];
+            float scale = Mathf.Lerp(s.a, s.b, (angle % 90) / 90f);
             go.transform.localPosition = pos_in_circle(radius, angle/360f * 2 * Mathf.PI);
             go.transform.localScale = new Vector3(scale, scale, scale);
         }
