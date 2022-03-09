@@ -89,7 +89,7 @@ Shader "Unlit/Ripple"
             float3 ComputeRipple(float2 uv)
             {
                 float3 normal;
-                float t = _Time.y;
+                float t = frac(_Time.y);
                 float4 ripple = tex2D(_RippleTex, uv);
                 float dropFrac = frac(ripple.a + t);
                 float timeFrac = dropFrac - 1.0 + ripple.r;
