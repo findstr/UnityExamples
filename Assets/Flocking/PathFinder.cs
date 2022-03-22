@@ -58,8 +58,8 @@ public class PathFinder : MonoBehaviour
 	private OpenList open = new OpenList();
 	public int close_idx = 1;
 	// Start is called before the first frame update
-        void Awake()
-        {
+	void Awake()
+	{
 		float xsize = transform.localScale.x;
 		float ysize = transform.localScale.y;
 		int xn = (int)(xsize / cellSize);
@@ -88,12 +88,13 @@ public class PathFinder : MonoBehaviour
 	public Vector2 GridPosition(int x, int y) {
 		return new Vector2(x * cellSize, y * cellSize) - new Vector2(transform.localScale.x, transform.localScale.y) / 2 + new Vector2(cellSize / 2, cellSize / 2);
 	}
-	public Vector2 GridPosition(Vector3Int v) {
-		return GridPosition(v.x, v.y);
+	public Vector3 GridPosition(Vector3Int v) {
+		var p = GridPosition(v.x, v.y);
+		return new Vector3(p.x, p.y, 0);
 	}
 	public Vector2Int WhichGrid(Vector3 pos) {
 		Vector2Int coord = new Vector2Int();
-		pos -= transform.position + new Vector3(cellSize / 2, cellSize / 2, cellSize / 2) - transform.localScale / 2;
+		pos = pos - transform.position + transform.localScale / 2;
 		coord.x = (int)(pos.x / cellSize);
 		coord.y = (int)(pos.y / cellSize);
 		return coord;
@@ -111,7 +112,9 @@ public class PathFinder : MonoBehaviour
 	};
 
 	public void Bake(int tx, int ty) {
-		open.Push(grids[ty, tx], 0);
+		var target = grids[ty, tx];
+		open.Push(target, 0);
+		target.next = null;
 		while (!open.IsEmpty()) {
 			open.Pop(out Node p, out int cost);
 			p.close = close_idx;
@@ -125,6 +128,7 @@ public class PathFinder : MonoBehaviour
 				}
 			}
 		}
+		Debug.Log("Bake:" + grids[ty,tx].next);
 
 	}
 	// Update is called once per frame

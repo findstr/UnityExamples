@@ -12,6 +12,7 @@ public class Flocking : MonoBehaviour
         void Start()
         {
                 var n = PathFinder.WhichGridNode(agent.transform.position);
+                Debug.Log("Flocking start:" + n.coord + ":" + agent.transform.position);
                 for (int i = 0; i < agentCount; i++) {
                         var go = Instantiate(agent, transform) as GameObject;
                         go.SetActive(true);
@@ -19,6 +20,7 @@ public class Flocking : MonoBehaviour
                         pools.Add(a);
                         a.Born(PathFinder, n);
                 }
+                Debug.Log("Flocking start2");
         }
 
         // Update is called once per frame
