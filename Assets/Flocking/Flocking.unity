@@ -266,7 +266,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PathFinder: {fileID: 1502775393}
   agent: {fileID: 986725235}
-  agentCount: 1
+  agentCount: 50
 --- !u!65 &400303543
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -337,7 +337,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 400303541}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.35, y: 6.62, z: 0}
+  m_LocalPosition: {x: -0.35, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 986725236}
@@ -670,7 +670,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dada0d1e0a6d674cae7e374a9943681, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.3
   Velocity: {x: 0, y: 0, z: 0}
 --- !u!1 &1102461024
 GameObject:
@@ -990,6 +989,15 @@ MonoBehaviour:
   grid_range: {x: 0, y: 0}
   goal: {x: 0, y: 0}
   close_idx: 1
+  around:
+  - {x: -1, y: -1, z: 15}
+  - {x: 0, y: -1, z: 10}
+  - {x: 1, y: -1, z: 15}
+  - {x: -1, y: 0, z: 10}
+  - {x: 1, y: 0, z: 10}
+  - {x: -1, y: 1, z: 15}
+  - {x: 0, y: 1, z: 10}
+  - {x: 1, y: 1, z: 15}
 --- !u!1 &1668514155
 GameObject:
   m_ObjectHideFlags: 0

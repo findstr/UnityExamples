@@ -55,6 +55,7 @@ public class PathFinder : MonoBehaviour
 	public Node[,] grids;
 	public Vector2Int grid_range = Vector2Int.zero;
 	public Vector2Int goal = Vector2Int.zero;
+	private Vector3 target_position = Vector3.zero;
 	private OpenList open = new OpenList();
 	public int close_idx = 1;
 	// Start is called before the first frame update
@@ -80,13 +81,38 @@ public class PathFinder : MonoBehaviour
 		}
 		Debug.Log("xn:" + xn + " yn:" + yn);
 	}
-	public Node Next(Node n) {
-		if (n != null && n.next != null && n.next.close == close_idx)
-			return n.next;
-		return null;
+	public bool Next(Vector3 current, out Vector3 target) {
+                var n = WhichGridNode(current);
+		if (n != null && n.next != null && n.next.close == close_idx) {
+			target = GridPosition(n.next.coord);
+			return false;
+		}
+		target = target_position;
+		return true;
+	}
+	public Vector3 Around(Vector3 current) {
+		int n = 1;
+		Vector2Int c = WhichGrid(current);
+		Vector3 pos = GridPosition(c.x, c.y);
+		for (int i = 0; i < around.Length; i++) {
+			var a = around[i];
+			var coord = new Vector2Int(a.x, a.y) + c;
+			if (coord.x >= 0 && coord.x < grid_range.x && coord.y >=0 && coord.y < grid_range.y) {
+				var g = grids[coord.y, coord.x];
+				if (g != null) {
+					var p = GridPosition(coord.x, coord.y);
+					pos += new Vector3(p.x, p.y, 0);
+					++n;
+				}
+			}
+		}
+		return pos / n;
 	}
 	public Vector2 GridPosition(int x, int y) {
-		return new Vector2(x * cellSize, y * cellSize) - new Vector2(transform.localScale.x, transform.localScale.y) / 2 + new Vector2(cellSize / 2, cellSize / 2);
+		if (goal.x == x && goal.y == y)
+			return target_position;
+		else
+			return new Vector2(x * cellSize, y * cellSize) - new Vector2(transform.localScale.x, transform.localScale.y) / 2 + new Vector2(cellSize / 2, cellSize / 2);
 	}
 	public Vector3 GridPosition(Vector3Int v) {
 		var p = GridPosition(v.x, v.y);
@@ -103,16 +129,22 @@ public class PathFinder : MonoBehaviour
 		Vector2Int coord = WhichGrid(pos);
 		return grids[coord.y, coord.x];
 	}
+	public Node GetNode(Vector2Int coord) {
+		return grids[coord.y, coord.x];
+	}
 
-
-	private Vector3Int[] around = new Vector3Int[] {
+	public Vector3Int[] around = new Vector3Int[] {
 		new Vector3Int(-1, -1, 15), new Vector3Int(0, -1, 10), new Vector3Int(1, -1, 15),
 		new Vector3Int(-1,  0, 10),				new Vector3Int(1, 0, 10),
 		new Vector3Int(-1,  1, 15), new Vector3Int(0, 1, 10), new Vector3Int(1, 1, 15),
 	};
 
-	public void Bake(int tx, int ty) {
-		var target = grids[ty, tx];
+	public void Bake(Vector3 point) {
+		goal = WhichGrid(point);
+		var target = grids[goal.y, goal.x];
+		if (target == null)
+			return ;
+		target_position = point;
 		open.Push(target, 0);
 		target.next = null;
 		while (!open.IsEmpty()) {
@@ -128,8 +160,7 @@ public class PathFinder : MonoBehaviour
 				}
 			}
 		}
-		Debug.Log("Bake:" + grids[ty,tx].next);
-
+		Debug.Log("Bake:" + target.next);
 	}
 	// Update is called once per frame
 	void Update()
@@ -137,9 +168,8 @@ public class PathFinder : MonoBehaviour
 		if (Input.GetMouseButtonDown(0)) {
 			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Physics.Raycast(ray, out RaycastHit hit, 30)) {
-				goal = WhichGrid(hit.point);
 				++close_idx;
-				Bake(goal.x, goal.y);
+				Bake(hit.point);
 				Debug.Log("Goal:" + goal + ":" + hit.point);
 			}
 		}
