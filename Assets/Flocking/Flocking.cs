@@ -29,8 +29,8 @@ public class Flocking : MonoBehaviour
         // Update is called once per frame
         void FixedUpdate()
         {
-                if (close_idx == PathFinder.close_idx)
-                        return ;
+          //      if (close_idx == PathFinder.close_idx)
+          //              return ;
                 int moving = 0;
                 for (int i = 0; i < pools.Count; i++) {
                         moving += pools[i].Moving(pools);

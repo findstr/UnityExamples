@@ -90,23 +90,9 @@ public class PathFinder : MonoBehaviour
 		target = target_position;
 		return true;
 	}
-	public Vector3 Around(Vector3 current) {
-		int n = 1;
-		Vector2Int c = WhichGrid(current);
-		Vector3 pos = GridPosition(c.x, c.y);
-		for (int i = 0; i < around.Length; i++) {
-			var a = around[i];
-			var coord = new Vector2Int(a.x, a.y) + c;
-			if (coord.x >= 0 && coord.x < grid_range.x && coord.y >=0 && coord.y < grid_range.y) {
-				var g = grids[coord.y, coord.x];
-				if (g != null) {
-					var p = GridPosition(coord.x, coord.y);
-					pos += new Vector3(p.x, p.y, 0);
-					++n;
-				}
-			}
-		}
-		return pos / n;
+	public bool Colliding(Vector3 pos) {
+		var n = WhichGridNode(pos);
+		return (n == null);
 	}
 	public Vector2 GridPosition(int x, int y) {
 		if (goal.x == x && goal.y == y)
