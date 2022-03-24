@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 public class Node {
+	public string name;
 	public bool isobstacle;
 	public int close = 0;
 	public Vector3Int coord;
@@ -72,9 +73,10 @@ public class PathFinder : MonoBehaviour
 		for (int y = 0; y < yn; y++) {
 			for (int x = 0; x < xn; x++) {
 				Vector2 pos = GridPosition(x, y);
-				bool obstacle = Physics2D.OverlapBox(pos, new Vector2(cellSize, cellSize), 0, ObstacleLayer);
+				var collider = Physics2D.OverlapBox(pos, new Vector2(cellSize, cellSize), 0, ObstacleLayer);
 				grids[y,x] = new Node() {
-					isobstacle = obstacle,
+					name = collider != null ? collider.name : "",
+					isobstacle = collider != null,
 					position = new Vector3(pos.x, pos.y, 0),
 					coord = new Vector3Int(x, y, 0),
 				};
@@ -118,24 +120,22 @@ public class PathFinder : MonoBehaviour
 		new Vector3Int(-1,  1, 15), new Vector3Int(0, 1, 10), new Vector3Int(1, 1, 15),
 	};
 
-	public void Find(Vector3 from, Vector3 point, List<Vector3> path) {
-		var start = WhichGridNode(from);
-		var target = WhichGridNode(point);
-		if (target.isobstacle) {
-			path.Clear();
-			return ;
-		}
-		point.z = from.z;
-		if (target == start) {
-			path.Clear();
-			if ((from - point).magnitude > 0.01f)
-				path.Add(point);
-			return ;
-		}
+	public Vector3 Collider(Vector3 pos, float size) {
+		var pp = new Vector2(pos.x, pos.y);
+		var hit = Physics2D.OverlapBox(pp, new Vector2(size, size), 0, ObstacleLayer);
+		if (hit == null)
+			return Vector3.zero;
+		var dir = (pos - hit.gameObject.transform.position);
+		return dir.normalized;
+	}
+	public void Bake(Vector3 point) {
 		++close_idx;
 		target_position = point;
-		open.Push(start, 0);
-		start.next = null;
+		var target = WhichGridNode(point);
+		if (target.isobstacle)
+			return ;
+		open.Push(target, 0);
+		target.next = null;
 		while (!open.IsEmpty()) {
 			open.Pop(out Node p, out int cost);
 			p.close = close_idx;
@@ -148,22 +148,31 @@ public class PathFinder : MonoBehaviour
 						if(n.CanEnter()) {
 							if (open.Push(n, cost + x.z))
 								n.next = p;
-						} 
+						} else {
+							n.next = p;
+							n.close = close_idx;
+						}
 					}
 				}
 			}
 		}
-		path.Clear();
-		if (target.next == null || target.next.close != close_idx) 
-			return ;
-		path.Clear();
-		point.z = from.z;
-		path.Add(point);
-		for (var n = target.next; n.next != null; n = n.next)  {
-			n.position.z = from.z;
-			path.Add(n.position);
+	}
+
+	public bool Next(Vector3 point, out Vector3 t) {
+		t = Vector3.zero;
+		var start = WhichGridNode(point);
+		if (start.close != close_idx)
+			return false;
+		var target = WhichGridNode(target_position);
+		if (start == target) {
+			if ((target_position - point).magnitude > 0.1f)  {
+				t = target_position;
+				return true;
+			}
+			return false; 
 		}
-		path.Reverse();
+		t = start.next.position;
+		return true;
 	}
 }
 
