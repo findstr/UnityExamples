@@ -6,3 +6,6 @@ Some demo example
 
 ### Ripple
 ![](/GIF/ripple.gif)
+
+### Flocking
+![](/GIF/flocking.gif)

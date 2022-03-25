@@ -1781,7 +1781,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 840678318, guid: d1ce76d9880d2224daf799edbd26b1a0, type: 3}
       propertyPath: speed
-      value: 1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 840678318, guid: d1ce76d9880d2224daf799edbd26b1a0, type: 3}
       propertyPath: closeRadius
@@ -1868,7 +1868,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 840678318, guid: d1ce76d9880d2224daf799edbd26b1a0, type: 3}
       propertyPath: speed
-      value: 2
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 840678318, guid: d1ce76d9880d2224daf799edbd26b1a0, type: 3}
       propertyPath: closeRadius
