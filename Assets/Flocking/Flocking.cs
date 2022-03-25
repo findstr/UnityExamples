@@ -12,6 +12,7 @@ public class Flocking : MonoBehaviour
         public float seperationWeight = 1.0f;
         public float colliderWeight = 10.0f;
         public float coherisonWeight = 0.5f;
+        public float alighWeight = 0.5f;        
         public Vector3 target = Vector3.zero;
         private List<Agent> pools = new List<Agent>();
         private List<Vector3> teamSlot = new List<Vector3>();
@@ -109,6 +110,23 @@ public class Flocking : MonoBehaviour
                 return d.normalized * strength;
         }
 
+        Vector3 Alignment(Agent character) {
+                int n = 0;
+                Vector3 v = Vector3.zero;
+                float speed = character.speed;
+                foreach (var t in pools) {
+                        var dir = character.transform.position - t.transform.position;
+                        if (dir.magnitude <= character.cohesionRadius) {
+                                ++n;
+                                v += t.Velocity;
+                        }
+                }
+                if (n == 0)
+                        return Vector3.zero;
+                v /= n;
+                return v;
+        }	
+
         void BuildTeam(float radius) {
                 teamSlot.Clear();
                 float unit = 360.0f / agentCount;
@@ -137,7 +155,9 @@ public class Flocking : MonoBehaviour
                         t.z = agent.transform.position.z;
                         var sep = Seperation(agent);
                         var coh = Cohersion(agent);
+                        var align = Alignment(agent);
                         if (agent.isstable) {
+                                align = Vector3.zero;
                                 coh = Vector3.zero;
                         }
                         var p = agent.transform.position;
@@ -149,7 +169,7 @@ public class Flocking : MonoBehaviour
                         } else {
                                 agent.Isrunning = false;
                         }
-                        velocity += colliderWeight * colliderv + seperationWeight * sep + coherisonWeight * coh;
+                        velocity += colliderWeight * colliderv + seperationWeight * sep + coherisonWeight * coh + alighWeight * align;
                         if (velocity.magnitude > agent.speed)
                                 velocity = velocity.normalized * agent.speed;
                         var np = p + velocity * Time.deltaTime;
@@ -166,4 +186,6 @@ public class Flocking : MonoBehaviour
                         agent.Velocity = velocity;
                 }
         }
+
+
 }
