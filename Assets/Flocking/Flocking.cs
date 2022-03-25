@@ -6,7 +6,12 @@ public class Flocking : MonoBehaviour
 {
         public PathFinder PathFinder;
         public GameObject templ;
+        public Flocking enemy;
+        public int click = 0;
         public int agentCount = 0;
+        public float seperationWeight = 1.0f;
+        public float colliderWeight = 10.0f;
+        public float coherisonWeight = 0.5f;
         public Vector3 target = Vector3.zero;
         private List<Agent> pools = new List<Agent>();
         private List<Vector3> teamSlot = new List<Vector3>();
@@ -27,7 +32,7 @@ public class Flocking : MonoBehaviour
         // Update is called once per frame
 	void Update()
 	{
-		if (Input.GetMouseButtonDown(0)) {
+		if (Input.GetMouseButtonDown(click)) {
 			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Physics.Raycast(ray, out RaycastHit hit, 30)) {
                                 target = hit.point;
@@ -38,8 +43,7 @@ public class Flocking : MonoBehaviour
 			}
 		}
 	}
-        bool Colidering(Agent character, out Vector3 v) {
-                float radius = character.colliderRadius;
+        public bool Colidering(Agent character, out Vector3 v) {
                 float speed = character.speed;
                 v = Vector3.zero;
                 var cdir = PathFinder.Collider(character.transform.position,  character.colliderRadius);
@@ -49,8 +53,11 @@ public class Flocking : MonoBehaviour
                 }
                 return false;
         }
-
-        Vector3 Seperation(Agent character) {
+        public int enter = 0;
+	public Vector3 Seperation(Agent character) {
+                if (enter == 1)
+                        return Vector3.zero;
+                enter = 1;
                 int n = 0;
                 float min_radius = 0.0f;
                 float max_radius = character.closeRadius;
@@ -67,8 +74,13 @@ public class Flocking : MonoBehaviour
                                 v += dir.normalized * strength;
                         }
                 }
+                if (enemy != null) {
+                        ++n;
+                        v += enemy.Seperation(character);
+                }
                 if (n > 0)
                         v /= n;
+                enter = 0;
                 return v;
         }
 
@@ -137,7 +149,7 @@ public class Flocking : MonoBehaviour
                         } else {
                                 agent.Isrunning = false;
                         }
-                        velocity += 10.0f * colliderv + 2.0f * sep + coh;
+                        velocity += colliderWeight * colliderv + seperationWeight * sep + coherisonWeight * coh;
                         if (velocity.magnitude > agent.speed)
                                 velocity = velocity.normalized * agent.speed;
                         var np = p + velocity * Time.deltaTime;
